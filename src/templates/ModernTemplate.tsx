@@ -1,9 +1,10 @@
 import { DOC_TYPES } from "../types";
 import { computeTotals, isPayroll, lineTotal } from "../lib/calc";
-import { formatDate, formatRupiah, terbilang } from "../lib/format";
+import { formatDate, formatRupiah, formatSignedRupiah, terbilang } from "../lib/format";
 import {
   PartyBlock,
   PayrollBody,
+  RichTextBlock,
   SignatureBlock,
   type TemplateProps,
 } from "./shared";
@@ -76,6 +77,7 @@ export default function ModernTemplate({ data }: TemplateProps) {
             </div>
             <PartyBlock
               name={data.client.name}
+              pic={data.client.pic}
               address={data.client.address}
               phone={data.client.phone}
               email={data.client.email}
@@ -143,7 +145,7 @@ export default function ModernTemplate({ data }: TemplateProps) {
         {/* Totals */}
         {showAmounts && (
           <div className="mt-5 flex justify-end">
-            <div className="w-64 space-y-1.5 text-[12px]">
+            <div className="w-72 max-w-full space-y-1.5 text-[12px]">
               <TotalRow
                 label="Subtotal"
                 value={formatRupiah(totals.subtotal)}
@@ -160,6 +162,9 @@ export default function ModernTemplate({ data }: TemplateProps) {
                   value={formatRupiah(totals.taxAmount)}
                 />
               )}
+              {data.adjustments.filter((row) => row.enabled).map((row) => (
+                <TotalRow key={row.id} label={row.label.trim() || "Penyesuaian"} value={formatSignedRupiah(row.amount)} />
+              ))}
               <div
                 className="mt-1 flex items-center justify-between rounded-md px-3 py-2 text-white"
                 style={{ background: GREEN }}
@@ -191,7 +196,7 @@ export default function ModernTemplate({ data }: TemplateProps) {
                 <div className="mb-0.5 font-semibold text-slate-600">
                   Catatan
                 </div>
-                <div className="whitespace-pre-line">{data.notes}</div>
+                <RichTextBlock text={data.notes} html={data.notesHtml} />
               </div>
             )}
             {data.terms && (
@@ -199,7 +204,7 @@ export default function ModernTemplate({ data }: TemplateProps) {
                 <div className="mb-0.5 font-semibold text-slate-600">
                   Syarat & Ketentuan
                 </div>
-                <div className="whitespace-pre-line">{data.terms}</div>
+                <RichTextBlock text={data.terms} html={data.termsHtml} />
               </div>
             )}
           </div>
@@ -225,9 +230,9 @@ function Row({ label, value }: { label: string; value: string }) {
 
 function TotalRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between text-slate-600">
-      <span>{label}</span>
-      <span className="font-medium">{value}</span>
+    <div className="flex justify-between gap-3 text-slate-600">
+      <span className="min-w-0 break-words">{label}</span>
+      <span className="shrink-0 whitespace-nowrap font-medium">{value}</span>
     </div>
   );
 }

@@ -15,7 +15,6 @@ import type {
   DocumentData,
   PayrollData,
   PayrollLine,
-  Party,
   TemplateId,
 } from "../../types";
 import { DOC_TYPES, TEMPLATES } from "../../types";
@@ -26,6 +25,8 @@ import { Field, Input, Section, Select, TextArea } from "../ui";
 import ImageUpload from "./ImageUpload";
 import ItemsTable from "./ItemsTable";
 import SignaturePad from "./SignaturePad";
+import { AdjustmentsEditor } from "./AdjustmentsEditor";
+import { RichTextEditor } from "./RichTextEditor";
 
 interface Props {
   data: DocumentData;
@@ -40,7 +41,7 @@ export default function Editor({ data, update }: Props) {
   function patchCompany(patch: Partial<DocumentData["company"]>) {
     update({ company: { ...data.company, ...patch } });
   }
-  function patchClient(patch: Partial<Party>) {
+  function patchClient(patch: Partial<DocumentData["client"]>) {
     update({ client: { ...data.client, ...patch } });
   }
   function patchPayroll(patch: Partial<PayrollData>) {
@@ -98,7 +99,7 @@ export default function Editor({ data, update }: Props) {
                 onClick={() => update({ templateId: t.id as TemplateId })}
                 className={`cursor-pointer rounded-lg border p-2.5 text-left transition-colors duration-200 ${
                   data.templateId === t.id
-                    ? "border-primary bg-primary/5 ring-1 ring-primary"
+                    ? "border-border bg-primary/10 text-primary"
                     : "border-border hover:border-primary/50"
                 }`}
               >
@@ -169,6 +170,14 @@ export default function Editor({ data, update }: Props) {
         </Field>
         {!payroll && (
           <>
+            <Field label="PIC (opsional)">
+              <Input
+                aria-label="PIC (opsional)"
+                placeholder="Nama penanggung jawab / kontak"
+                value={data.client.pic ?? ""}
+                onChange={(e) => patchClient({ pic: e.target.value.trim() ? e.target.value : null })}
+              />
+            </Field>
             <Field label="Alamat">
               <TextArea
                 rows={2}
@@ -365,8 +374,8 @@ export default function Editor({ data, update }: Props) {
 
         {cfg.showAmounts && (
           <div className="mt-3 space-y-3 rounded-lg bg-muted/60 p-3">
-            <label className="flex items-center justify-between gap-2 text-sm">
-              <span className="flex items-center gap-2 font-medium text-slate-600">
+            <div className="flex items-center justify-between gap-2 text-sm">
+              <label className="flex min-h-11 shrink-0 cursor-pointer items-center gap-2 font-medium text-slate-600 sm:min-h-0">
                 <input
                   type="checkbox"
                   checked={data.showDiscount}
@@ -374,19 +383,20 @@ export default function Editor({ data, update }: Props) {
                   className="h-4 w-4 cursor-pointer accent-primary"
                 />
                 Diskon (Rp)
-              </span>
+              </label>
               <Input
+                aria-label="Nominal diskon (Rp)"
                 type="number"
                 min={0}
                 disabled={!data.showDiscount}
                 value={data.discount}
                 onChange={(e) => update({ discount: Number(e.target.value) })}
-                className="w-32 disabled:opacity-50"
+                className="max-w-[8rem] disabled:bg-muted disabled:opacity-50"
               />
-            </label>
+            </div>
 
-            <label className="flex items-center justify-between gap-2 text-sm">
-              <span className="flex items-center gap-2 font-medium text-slate-600">
+            <div className="flex items-center justify-between gap-2 text-sm">
+              <label className="flex min-h-11 shrink-0 cursor-pointer items-center gap-2 font-medium text-slate-600 sm:min-h-0">
                 <input
                   type="checkbox"
                   checked={data.showTax}
@@ -394,16 +404,23 @@ export default function Editor({ data, update }: Props) {
                   className="h-4 w-4 cursor-pointer accent-primary"
                 />
                 Pajak (%)
-              </span>
+              </label>
               <Input
+                aria-label="Persentase pajak (%)"
                 type="number"
                 min={0}
+                step="any"
                 disabled={!data.showTax}
                 value={data.taxPercent}
                 onChange={(e) => update({ taxPercent: Number(e.target.value) })}
-                className="w-32 disabled:opacity-50"
+                className="max-w-[8rem] disabled:bg-muted disabled:opacity-50"
               />
-            </label>
+            </div>
+
+            <AdjustmentsEditor
+              adjustments={data.adjustments}
+              onChange={(adjustments) => update({ adjustments })}
+            />
 
             <div className="flex items-center justify-between border-t border-border pt-2 text-sm">
               <span className="font-semibold text-foreground">Total</span>
@@ -421,20 +438,16 @@ export default function Editor({ data, update }: Props) {
         title="Catatan & Ketentuan"
         icon={<Notepad size={16} weight="bold" />}
       >
-        <Field label="Catatan">
-          <TextArea
-            rows={2}
-            value={data.notes}
-            onChange={(e) => update({ notes: e.target.value })}
-          />
-        </Field>
-        <Field label="Syarat & Ketentuan">
-          <TextArea
-            rows={2}
-            value={data.terms}
-            onChange={(e) => update({ terms: e.target.value })}
-          />
-        </Field>
+        <RichTextEditor
+          label="Catatan"
+          value={{ text: data.notes, html: data.notesHtml }}
+          onChange={({ text, html }) => update({ notes: text, notesHtml: html })}
+        />
+        <RichTextEditor
+          label="Syarat & Ketentuan"
+          value={{ text: data.terms, html: data.termsHtml }}
+          onChange={({ text, html }) => update({ terms: text, termsHtml: html })}
+        />
       </Section>
 
       {/* Signature */}

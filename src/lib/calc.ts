@@ -25,6 +25,7 @@ export interface Totals {
   subtotal: number;
   taxAmount: number;
   discount: number;
+  adjustmentAmount: number;
   total: number;
 }
 
@@ -35,6 +36,11 @@ export function computeTotals(data: DocumentData): Totals {
   const taxAmount = data.showTax
     ? (base * (Number(data.taxPercent) || 0)) / 100
     : 0;
-  const total = base + taxAmount;
-  return { subtotal, taxAmount, discount, total };
+  const adjustmentAmount = data.adjustments.reduce(
+    (sum, adjustment) =>
+      sum + (adjustment.enabled ? Number(adjustment.amount) || 0 : 0),
+    0,
+  );
+  const total = base + taxAmount + adjustmentAmount;
+  return { subtotal, taxAmount, discount, adjustmentAmount, total };
 }

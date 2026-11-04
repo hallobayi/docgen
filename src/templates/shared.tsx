@@ -1,9 +1,17 @@
 import type { DocumentData } from "../types";
 import { computePayroll } from "../lib/calc";
 import { formatDate, formatRupiah, terbilang } from "../lib/format";
+import { richTextContent } from "../lib/rich-text";
 
 export interface TemplateProps {
   data: DocumentData;
+}
+
+export function RichTextBlock({ text, html }: {
+  readonly text: string;
+  readonly html: string | null;
+}) {
+  return <div className="rich-text" dangerouslySetInnerHTML={{ __html: richTextContent({ text, html }) }} />;
 }
 
 /** Renders the signature area (draw/upload image or typed name) */
@@ -155,15 +163,18 @@ export function PartyBlock({
   address,
   phone,
   email,
+  pic,
 }: {
   name: string;
   address?: string;
   phone?: string;
   email?: string;
+  pic?: string | null;
 }) {
   return (
     <div className="space-y-0.5 text-[12px] leading-snug text-slate-600">
       <div className="text-[13px] font-bold text-slate-800">{name}</div>
+      {pic?.trim() && <div className="break-words">PIC: {pic}</div>}
       {address && <div className="whitespace-pre-line">{address}</div>}
       {phone && <div>{phone}</div>}
       {email && <div>{email}</div>}

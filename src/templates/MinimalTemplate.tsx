@@ -1,7 +1,7 @@
 import { DOC_TYPES } from "../types";
 import { computeTotals, isPayroll, lineTotal } from "../lib/calc";
-import { formatDate, formatRupiah, terbilang } from "../lib/format";
-import { PayrollBody, SignatureBlock, type TemplateProps } from "./shared";
+import { formatDate, formatRupiah, formatSignedRupiah, terbilang } from "../lib/format";
+import { PayrollBody, RichTextBlock, SignatureBlock, type TemplateProps } from "./shared";
 
 const GREEN = "#059669";
 
@@ -70,6 +70,7 @@ export default function MinimalTemplate({ data }: TemplateProps) {
             {"\n"}
             {data.client.address}
           </div>
+          {data.client.pic?.trim() && <div className="break-words text-slate-600">PIC: {data.client.pic}</div>}
         </div>
       </div>
 
@@ -122,7 +123,7 @@ export default function MinimalTemplate({ data }: TemplateProps) {
 
       {showAmounts && (
         <div className="mt-6 flex justify-end">
-          <div className="w-60 space-y-2 text-[12px]">
+          <div className="w-72 max-w-full space-y-2 text-[12px]">
             <div className="flex justify-between text-slate-500">
               <span>Subtotal</span>
               <span>{formatRupiah(totals.subtotal)}</span>
@@ -139,6 +140,12 @@ export default function MinimalTemplate({ data }: TemplateProps) {
                 <span>{formatRupiah(totals.taxAmount)}</span>
               </div>
             )}
+            {data.adjustments.filter((row) => row.enabled).map((row) => (
+              <div key={row.id} className="flex justify-between gap-3 text-slate-500">
+                <span className="min-w-0 break-words">{row.label.trim() || "Penyesuaian"}</span>
+                <span className="shrink-0 whitespace-nowrap">{formatSignedRupiah(row.amount)}</span>
+              </div>
+            ))}
             <div
               className="flex justify-between border-t border-slate-300 pt-2 text-[15px] font-semibold"
               style={{ color: GREEN }}
@@ -163,10 +170,10 @@ export default function MinimalTemplate({ data }: TemplateProps) {
       <div className="mt-auto flex items-end justify-between gap-8 pt-12">
         <div className="max-w-[300px] space-y-2 text-[11px] leading-relaxed text-slate-400">
           {data.notes && (
-            <div className="whitespace-pre-line">{data.notes}</div>
+            <RichTextBlock text={data.notes} html={data.notesHtml} />
           )}
           {data.terms && (
-            <div className="whitespace-pre-line">{data.terms}</div>
+            <RichTextBlock text={data.terms} html={data.termsHtml} />
           )}
         </div>
         <SignatureBlock

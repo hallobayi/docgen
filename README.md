@@ -13,9 +13,16 @@ dan Purchase Order.
 - **3 template** — Modern, Classic, Minimal (ganti kapan saja, data tetap).
 - **Upload logo** perusahaan (disimpan sebagai data URL).
 - Identitas perusahaan + alamat, dan blok **"Kepada"** (penerima).
+- **PIC penerima opsional** — baris PIC hanya dicetak saat diisi.
 - **Tabel produk/jasa** — tambah/hapus baris, qty × harga, satuan; auto-hitung subtotal, diskon, pajak, total.
 - Format **Rupiah** (`Rp1.000.000`) + **terbilang** otomatis.
-- **Catatan** & syarat/ketentuan.
+- Diskon dan pajak bisa **diaktifkan/nonaktifkan** tanpa menghapus nominalnya.
+- **Penyesuaian custom** dengan nama bebas dan nominal positif/negatif (misalnya
+  Potongan PPh 21 `-2000` atau biaya tambahan `+1000`), dihitung setelah pajak;
+  setiap baris bisa dinonaktifkan atau dihapus.
+- **Editor rich text** untuk Catatan & Syarat/Ketentuan: tebal, miring, garis bawah,
+  coret, daftar poin/nomor, undo/redo, dan hapus format. Format ikut tersimpan
+  dan tercetak di semua template; dokumen lama dengan teks biasa tetap didukung.
 - **Tanda tangan** 3 mode: gambar di canvas, unggah gambar, atau ketik nama.
 - **Export PDF**: tombol *Cetak / Simpan PDF* (print browser, hasil tajam) atau *Download PDF*.
 - Data otomatis tersimpan di **localStorage** browser — refresh tidak menghilangkan isian.
@@ -27,6 +34,8 @@ npm run dev      # http://localhost:5173
 npm run build    # build produksi ke dist/
 npm run preview  # pratinjau hasil build
 ```
+
+Tes perhitungan dan kompatibilitas data dapat dijalankan dengan `bun test tests`.
 
 ## Tech
 Vite · React · TypeScript · Tailwind CSS · Phosphor Icons · html2canvas + jsPDF.

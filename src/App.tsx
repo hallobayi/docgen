@@ -56,6 +56,7 @@ type MenuItem =
 export default function App() {
   const { user, logout } = useAuth();
   const [data, setData] = useState<DocumentData>(() => loadData());
+  const [editorVersion, setEditorVersion] = useState(0);
   const [tab, setTab] = useState<MobileTab>("edit");
   const [busy, setBusy] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
@@ -100,6 +101,7 @@ export default function App() {
 
   // ---- Navigation ----
   function newDocument() {
+    setEditorVersion((version) => version + 1);
     setData(defaultData());
     setCurrentDocId(null);
     setCurrentStatus(null);
@@ -108,6 +110,7 @@ export default function App() {
   }
 
   function openDoc(doc: SavedDocument) {
+    setEditorVersion((version) => version + 1);
     // Older docs kept the name only in the `title` column, not inside the jsonb.
     setData({
       ...withDataDefaults(doc.data),
@@ -120,6 +123,7 @@ export default function App() {
   }
 
   function newFromTemplate(tplData: DocumentData, name: string) {
+    setEditorVersion((version) => version + 1);
     setData({ ...withDataDefaults(tplData), title: "" });
     setCurrentDocId(null);
     setCurrentStatus(null);
@@ -134,6 +138,7 @@ export default function App() {
       confirm("Reset semua isian ke contoh awal? Data saat ini akan hilang.")
     ) {
       clearData();
+      setEditorVersion((version) => version + 1);
       setData(defaultData());
       setCurrentDocId(null);
       setCurrentStatus(null);
@@ -398,7 +403,7 @@ export default function App() {
             <div
               className={`${tab === "edit" ? "block" : "hidden"} min-h-0 overflow-y-auto py-6 pr-1 lg:block`}
             >
-              <Editor data={data} update={update} />
+              <Editor key={editorVersion} data={data} update={update} />
               <p className="no-print mt-6 text-center text-[11px] text-slate-400">
                 {user
                   ? "Simpan sebagai Draft/Final ke akun Anda, atau jadikan Template."

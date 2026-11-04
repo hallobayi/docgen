@@ -31,6 +31,7 @@ export function defaultData(): DocumentData {
     },
     client: {
       name: "Nama Pelanggan",
+      pic: null,
       address: "Alamat pelanggan",
       phone: "",
       email: "",
@@ -48,8 +49,11 @@ export function defaultData(): DocumentData {
     discount: 0,
     showTax: true,
     showDiscount: false,
+    adjustments: [],
     notes: "Terima kasih atas kepercayaan Anda.",
     terms: "Pembayaran melalui transfer bank ke rekening yang tertera.",
+    notesHtml: null,
+    termsHtml: null,
     signature: {
       mode: "text",
       value: "",
@@ -85,6 +89,7 @@ export function withDataDefaults(partial: Partial<DocumentData>): DocumentData {
     ...partial,
     company: { ...base.company, ...partial.company },
     client: { ...base.client, ...partial.client },
+    adjustments: partial.adjustments ?? base.adjustments,
     signature: { ...base.signature, ...partial.signature },
     payroll: {
       ...base.payroll,

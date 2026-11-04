@@ -12,6 +12,11 @@ export function formatRupiah(value: number): string {
   return idr.format(Math.round(value));
 }
 
+export function formatSignedRupiah(value: number): string {
+  const sign = value < 0 ? "- " : value > 0 ? "+ " : "";
+  return `${sign}${formatRupiah(Math.abs(value))}`;
+}
+
 const num = new Intl.NumberFormat("id-ID");
 export function formatNumber(value: number): string {
   return num.format(value);
@@ -83,6 +88,8 @@ export function terbilang(value: number): string {
   const n = Math.round(Math.abs(value));
   if (n === 0) return "nol rupiah";
   const words = spell(n).replace(/\s+/g, " ").trim();
-  const capitalized = words.charAt(0).toUpperCase() + words.slice(1);
+  const capitalized = value < 0
+    ? `Minus ${words}`
+    : words.charAt(0).toUpperCase() + words.slice(1);
   return `${capitalized} rupiah`;
 }

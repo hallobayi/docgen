@@ -26,6 +26,13 @@ export interface LineItem {
   price: number;
 }
 
+export interface Adjustment {
+  readonly id: string;
+  readonly label: string;
+  readonly amount: number;
+  readonly enabled: boolean;
+}
+
 export interface Signature {
   mode: SignatureMode;
   /** dataURL for draw/upload, plain text (signer name) for text mode */
@@ -61,14 +68,17 @@ export interface DocumentData {
   date: string; // yyyy-mm-dd
   dueDate: string; // yyyy-mm-dd (optional depending on docType)
   company: Party & { logo: string }; // logo = dataURL
-  client: Party; // "Kepada"
+  client: Party & { pic: string | null }; // "Kepada"
   items: LineItem[];
   taxPercent: number;
   discount: number; // absolute amount in IDR
   showTax: boolean;
   showDiscount: boolean;
+  adjustments: Adjustment[];
   notes: string;
   terms: string;
+  notesHtml: string | null;
+  termsHtml: string | null;
   signature: Signature;
   /** Salary-invoice fields; ignored for every docType except "invoice-gaji". */
   payroll: PayrollData;

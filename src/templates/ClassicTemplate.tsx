@@ -1,7 +1,7 @@
 import { DOC_TYPES } from "../types";
 import { computeTotals, isPayroll, lineTotal } from "../lib/calc";
-import { formatDate, formatRupiah, terbilang } from "../lib/format";
-import { PayrollBody, SignatureBlock, type TemplateProps } from "./shared";
+import { formatDate, formatRupiah, formatSignedRupiah, terbilang } from "../lib/format";
+import { PayrollBody, RichTextBlock, SignatureBlock, type TemplateProps } from "./shared";
 
 // Classic: formal, serif-like structure with strong rules — good for PO / Kwitansi
 export default function ClassicTemplate({ data }: TemplateProps) {
@@ -61,6 +61,7 @@ export default function ClassicTemplate({ data }: TemplateProps) {
           <div className="mt-1 text-[13px] font-bold text-slate-900">
             {data.client.name}
           </div>
+          {data.client.pic?.trim() && <div className="break-words text-slate-600">PIC: {data.client.pic}</div>}
           <div className="whitespace-pre-line text-slate-600">
             {data.client.address}
           </div>
@@ -135,7 +136,7 @@ export default function ClassicTemplate({ data }: TemplateProps) {
 
       {showAmounts && (
         <div className="mt-4 flex justify-end">
-          <table className="w-64 text-[12px]">
+          <table className="w-72 max-w-full text-[12px]">
             <tbody>
               <TR label="Subtotal" value={formatRupiah(totals.subtotal)} />
               {data.showDiscount && totals.discount > 0 && (
@@ -150,6 +151,9 @@ export default function ClassicTemplate({ data }: TemplateProps) {
                   value={formatRupiah(totals.taxAmount)}
                 />
               )}
+              {data.adjustments.filter((row) => row.enabled).map((row) => (
+                <TR key={row.id} label={row.label.trim() || "Penyesuaian"} value={formatSignedRupiah(row.amount)} />
+              ))}
               <tr className="border-t-2 border-slate-800">
                 <td className="py-1.5 font-bold">TOTAL</td>
                 <td className="py-1.5 text-right text-[14px] font-bold">
@@ -174,11 +178,11 @@ export default function ClassicTemplate({ data }: TemplateProps) {
       <div className="mt-auto flex items-end justify-between gap-8 pt-10">
         <div className="max-w-[300px] space-y-2 text-[11px] text-slate-500">
           {data.notes && (
-            <div className="whitespace-pre-line">{data.notes}</div>
+            <RichTextBlock text={data.notes} html={data.notesHtml} />
           )}
           {data.terms && (
-            <div className="whitespace-pre-line border-t border-slate-200 pt-2">
-              {data.terms}
+            <div className="border-t border-slate-200 pt-2">
+              <RichTextBlock text={data.terms} html={data.termsHtml} />
             </div>
           )}
         </div>
@@ -200,8 +204,8 @@ function MetaLine({ label, value }: { label: string; value: string }) {
 function TR({ label, value }: { label: string; value: string }) {
   return (
     <tr>
-      <td className="py-1 text-slate-600">{label}</td>
-      <td className="py-1 text-right font-medium">{value}</td>
+      <td className="break-words py-1 pr-3 text-slate-600">{label}</td>
+      <td className="whitespace-nowrap py-1 text-right font-medium">{value}</td>
     </tr>
   );
 }
